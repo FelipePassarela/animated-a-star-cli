@@ -1,0 +1,17 @@
+[project]
+name = "animated-a-star-cli"
+version = "0.1.0"
+description = "Simple CLI grid-based A* pathfinder with real-time animated map visualization."
+readme = "README.md"
+authors = [
+    { name = "FelipePassarela", email = "126916744+FelipePassarela@users.noreply.github.com" },
+]
+requires-python = ">=3.14"
+dependencies = []
+
+[project.scripts]
+astar = "animated_a_star_cli:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
