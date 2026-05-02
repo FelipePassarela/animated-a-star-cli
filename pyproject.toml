@@ -7,10 +7,12 @@ authors = [
     { name = "FelipePassarela", email = "126916744+FelipePassarela@users.noreply.github.com" },
 ]
 requires-python = ">=3.14"
-dependencies = []
+dependencies = [
+    "pyyaml>=6.0.3",
+]
 
 [project.scripts]
-astar = "animated_a_star_cli:main"
+astar = "animated_a_star_cli.cli:main"
 
 [build-system]
 requires = ["hatchling"]
