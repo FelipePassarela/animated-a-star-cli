@@ -12,11 +12,23 @@ class Config:
     map: str
 
 
+class ConfigError(Exception):
+    pass
+
+
 def load_config(path: Path = CONFIG_PATH) -> Config:
     with open(path, "r") as f:
-        data = yaml.safe_load(f)
+        content = f.read()
+
+    if not content.strip():
+        raise ConfigError("config file is empty")
+
+    data = yaml.safe_load(content)
+
+    if not isinstance(data, dict):
+        raise ConfigError("invalid config format")
 
     try:
         return Config(**data)
-    except TypeError as e:
-        raise ValueError(f"Invalid config format: {e}")
+    except TypeError:
+        raise ConfigError("missing required config fields")
