@@ -10,10 +10,10 @@ def test_draw_renders_map_with_source_and_destination(
     capsys: pytest.CaptureFixture[str],
 ):
     grid = [
-        ["#", "#", "#", "#", "#"],
-        ["#", " ", " ", " ", "#"],
-        ["#", " ", "#", " ", "#"],
-        ["#", "#", "#", "#", "#"],
+        "#####",
+        "#   #",
+        "# # #",
+        "#####",
     ]
 
     map_obj = Map(grid)
