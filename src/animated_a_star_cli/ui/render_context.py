@@ -1,10 +1,8 @@
 from dataclasses import dataclass
 
-from animated_a_star_cli.core.map import Map
+from animated_a_star_cli.core.config import Config
 
 
 @dataclass
 class RenderContext:
-    map: Map
-    src: tuple[int, int]
-    dst: tuple[int, int]
+    cfg: Config
