@@ -1,8 +1,7 @@
 import sys
 
+from animated_a_star_cli import config
 from animated_a_star_cli.ui import parser
-
-from . import config
 
 
 def main():
