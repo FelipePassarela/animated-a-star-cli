@@ -12,3 +12,7 @@ class Map:
 
     def at(self, i, j):
         return self._grid[i, j]
+
+    @property
+    def grid(self):
+        return self._grid.copy()
