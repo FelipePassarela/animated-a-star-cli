@@ -1,13 +1,15 @@
 import sys
 
 from animated_a_star_cli.core import config
+from animated_a_star_cli.core.astar_state import AStarState
 from animated_a_star_cli.ui import parser, render
 from animated_a_star_cli.ui.render_context import RenderContext
 
 
 def main():
     cfg = _load_config()
-    render_ctx = RenderContext(cfg)
+    astar_state = AStarState()
+    render_ctx = RenderContext(cfg, astar_state)
     render.draw(render_ctx)
 
 

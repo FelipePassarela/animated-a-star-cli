@@ -1,3 +1,5 @@
+import textwrap
+
 from animated_a_star_cli.core.map import Map
 
 grid = [
@@ -9,14 +11,11 @@ grid = [
 
 
 def test_str_serializes_successfully():
-    # fmt: off
-    expected_str = (
-        "####\n"
-        "#  #\n"
-        "## #\n"
-        "####"
-    )
-    # fmt: on
+    expected_str = textwrap.dedent("""\
+        ####
+        #  #
+        ## #
+        ####""")
     m = Map(grid)
     assert str(m) == expected_str
 
