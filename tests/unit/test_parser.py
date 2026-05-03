@@ -1,3 +1,4 @@
+import textwrap
 from pathlib import Path
 
 import pytest
@@ -11,14 +12,12 @@ from animated_a_star_cli.ui.parser import (
     load_config,
 )
 
-# fmt: off
-MAP_STR = (
-    "#####\n"
-    "#o  #\n"
-    "# #x#\n"
-    "#####\n"
-)
-# fmt: on
+MAP_STR = textwrap.dedent("""\
+    #####
+    #o  #
+    # #x#
+    #####
+""")
 
 
 def test_parse_config_succeeds_with_valid_data():
@@ -82,50 +81,63 @@ def test_parse_map_replaces_source_and_destination_with_spaces():
     assert parsed_map.at(2, 3) == " "
 
 
-# fmt: off
 @pytest.mark.parametrize(
     "map_str, expected_error",
     [
         ("", "map string is empty"),
         ("   \n  ", "map string is empty"),
         (
-            "###\n"
-            "#o##\n",
+            textwrap.dedent("""\
+                ###
+                #o##
+            """),
             "map must be rectangular",
         ),
         (
-            "##\n"
-            "#o\n"
-            "##\n",
+            textwrap.dedent("""\
+                ##
+                #o
+                ##
+            """),
             "map must be at least 3x3",
         ),
         (
-            "#o#\n"
-            "#x#\n",
+            textwrap.dedent("""\
+                #o#
+                #x#
+            """),
             "map must be at least 3x3",
         ),
         (
-            "###\n"
-            "#o#\n"
-            "#a#\n",
+            textwrap.dedent("""\
+                ###
+                #o#
+                #a#
+            """),
             "map contains invalid characters",
         ),
         (
-            "###\n"
-            "#oo\n"
-            "#x#\n",
+            textwrap.dedent("""\
+                ###
+                #oo
+                #x#
+            """),
             "map must contain exactly one source 'o'",
         ),
         (
-            "###\n"
-            "#o#\n"
-            "#xx\n",
+            textwrap.dedent("""\
+                ###
+                #o#
+                #xx
+            """),
             "map must contain exactly one destination 'x'",
         ),
         (
-            "###\n"
-            "# #\n"
-            "# #\n",
+            textwrap.dedent("""\
+                ###
+                # #
+                # #
+            """),
             "map must contain exactly one source 'o'",
         ),
     ],
