@@ -2,7 +2,7 @@ from pathlib import Path
 
 import pytest
 
-from animated_a_star_cli.config import Config
+from animated_a_star_cli.core.config import Config
 from animated_a_star_cli.core.map import Map
 from animated_a_star_cli.ui.parser import (
     ParserError,

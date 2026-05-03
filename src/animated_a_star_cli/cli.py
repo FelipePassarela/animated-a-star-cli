@@ -1,6 +1,6 @@
 import sys
 
-from animated_a_star_cli import config
+from animated_a_star_cli.core import config
 from animated_a_star_cli.ui import parser, render
 from animated_a_star_cli.ui.render_context import RenderContext
 
