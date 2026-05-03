@@ -1,13 +1,15 @@
 import sys
 
 from animated_a_star_cli import config
-from animated_a_star_cli.ui import parser
+from animated_a_star_cli.ui import parser, render
+from animated_a_star_cli.ui.render_context import RenderContext
 
 
 def main():
     cfg = _load_config()
-    parsed_map = _parse_map(cfg.map)
-    print(parsed_map)
+    map, src, dst = _parse_map(cfg.map)
+    render_ctx = RenderContext(map, src, dst)
+    render.draw(render_ctx)
 
 
 def _load_config() -> config.Config:  # ty:ignore[invalid-return-type]

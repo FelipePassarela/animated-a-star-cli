@@ -1,13 +1,14 @@
 from animated_a_star_cli.core.map import Map
 
+grid = [
+    "####",
+    "#  #",
+    "## #",
+    "####",
+]
+
 
 def test_str_serializes_successfully():
-    grid = [
-        "####",
-        "#  #",
-        "## #",
-        "####",
-    ]
     # fmt: off
     expected_str = (
         "####\n"
@@ -18,3 +19,8 @@ def test_str_serializes_successfully():
     # fmt: on
     m = Map(grid)
     assert str(m) == expected_str
+
+
+def test_grid_returns_deep_copy():
+    map = Map(grid)
+    assert map.grid is not map._grid
