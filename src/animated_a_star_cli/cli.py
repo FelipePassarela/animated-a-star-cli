@@ -7,7 +7,7 @@ from animated_a_star_cli.ui.render_context import RenderContext
 
 def main():
     cfg = _load_config()
-    render_ctx = RenderContext(cfg.map, cfg.source, cfg.dest)
+    render_ctx = RenderContext(cfg)
     render.draw(render_ctx)
 
 
