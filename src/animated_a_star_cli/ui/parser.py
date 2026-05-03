@@ -3,10 +3,10 @@ from pathlib import Path
 import numpy as np
 import yaml
 
+from animated_a_star_cli import ROOT_DIR
 from animated_a_star_cli.core.config import Config
 from animated_a_star_cli.core.map import Map
 
-ROOT_DIR = Path(__file__).parent.parent.parent.parent
 CONFIG_PATH = ROOT_DIR / "config.yaml"
 
 
