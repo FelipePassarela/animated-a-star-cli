@@ -5,6 +5,7 @@ import yaml
 
 from animated_a_star_cli import ROOT_DIR
 from animated_a_star_cli.core.config import Config
+from animated_a_star_cli.core.heuristic import euclidean, manhattan
 from animated_a_star_cli.core.map import Map
 
 CONFIG_PATH = ROOT_DIR / "config.yaml"
@@ -32,9 +33,20 @@ def load_config(path: Path = CONFIG_PATH) -> Config:
 def _parse_config(data: dict) -> Config:
     if "map" not in data:
         raise ParserError("missing required 'map' field in config")
+    if "heuristic" not in data:
+        raise ParserError("missing required 'heuristic' field in config")
 
     map, source, dest = _parse_map(data["map"])
-    return Config(map=map, source=source, dest=dest)
+
+    match data["heuristic"]:
+        case "euclidean":
+            data["heuristic"] = euclidean
+        case "manhattan":
+            data["heuristic"] = manhattan
+        case _:
+            raise ParserError(f"unsupported heuristic '{data['heuristic']}'")
+
+    return Config(map=map, source=source, dest=dest, heuristic=data["heuristic"])
 
 
 def _parse_map(map_str: str) -> tuple[Map, tuple[int, int], tuple[int, int]]:
