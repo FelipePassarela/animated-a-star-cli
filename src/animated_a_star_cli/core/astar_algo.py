@@ -31,14 +31,16 @@ class AStarAlgo:
         source_cost = (self._f[self._source], *self._source)
         heapq.heappush(self._opens, source_cost)
 
-        self.finished = False
+        self._finished = self._state.finished
 
     def step(self) -> AStarState:
-        if self.finished:
+        if self._finished:
+            self._state.finished = True
             return self._build_path(self._current)
 
         if not self._opens:
-            self.finished = True
+            self._finished = True
+            self._state.finished = True
             return self._state
 
         _, i, j = heapq.heappop(self._opens)
@@ -51,7 +53,8 @@ class AStarAlgo:
         self._closeds.add(self._current)
 
         if self._current == self._dest:
-            self.finished = True
+            self._finished = True
+            self._state.finished = True
             return self._build_path(self._current)
 
         for neigh in self._neighbours(self._current):

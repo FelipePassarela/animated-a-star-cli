@@ -53,7 +53,7 @@ def astar_single_cell() -> AStarAlgo:
 def run_astar(astar: AStarAlgo) -> AStarState:
     for _ in range(100):
         state = astar.step()
-        if astar.finished:
+        if state.finished:
             break
     return state
 
@@ -63,7 +63,7 @@ def test_finds_path_from_source_to_dest(astar: AStarAlgo):
 
     expected_path = [(1, 1), (1, 2), (1, 3), (2, 3), (3, 3), (3, 2), (3, 1)]
 
-    assert astar.finished, "algorithm should have finished"
+    assert state.finished, "algorithm should have finished"
     assert state.path[0] == astar._source
     assert state.path[-1] == astar._dest
     assert state.path == expected_path
@@ -82,7 +82,7 @@ def test_path_properties(astar: AStarAlgo):
 def test_no_path_finishes_gracefully_without_path(astar_no_path: AStarAlgo):
     """When no path exists the algorithm should terminate gracefully."""
     state = run_astar(astar_no_path)
-    assert astar_no_path.finished
+    assert state.finished
     assert state.path == [(1, 1)], (
         "when no path exists, the path should only contain the source cell"
     )
