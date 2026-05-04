@@ -1,16 +1,24 @@
 import sys
 
 from animated_a_star_cli.core import config
-from animated_a_star_cli.core.astar_state import AStarState
+from animated_a_star_cli.core.astar_algo import AStarAlgo
 from animated_a_star_cli.ui import parser, render
 from animated_a_star_cli.ui.render_context import RenderContext
 
 
 def main():
     cfg = _load_config()
-    astar_state = AStarState()
-    render_ctx = RenderContext(cfg, astar_state)
-    render.draw(render_ctx)
+    astar = AStarAlgo(cfg)
+
+    while True:
+        print("\033[H\033[J", end="")  # Clear the terminal
+
+        state = astar.step()
+        render_ctx = RenderContext(cfg, state)
+        render.draw(render_ctx)
+
+        if state.finished:
+            break
 
 
 def _load_config() -> config.Config:  # ty:ignore[invalid-return-type]
