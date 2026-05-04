@@ -79,6 +79,15 @@ def test_parse_config_fails_with_missing_fields(config_data, missing_field):
     assert missing_field in str(exc.value)
 
 
+def test_parse_config_fails_with_unsupported_heuristic():
+    data = {"map": MAP_STR, "heuristic": "unsupported_heuristic"}
+
+    with pytest.raises(ParserError) as exc:
+        _parse_config(data)
+
+    assert "unsupported heuristic" in str(exc.value)
+
+
 def test_parse_map_replaces_source_and_destination_with_spaces():
     parsed_map, src, dst = _parse_map(MAP_STR)
 
