@@ -20,23 +20,6 @@ MAP_STR = textwrap.dedent("""\
 """)
 
 
-def test_parse_config_succeeds_with_valid_data():
-    data = {"map": MAP_STR}
-    cfg = _parse_config(data)
-
-    assert isinstance(cfg, Config)
-    assert isinstance(cfg.map, Map)
-    assert cfg.source == (1, 1)
-    assert cfg.dest == (2, 3)
-
-
-def test_parse_config_fails_with_missing_map_field():
-    data = {"wrong_field": "value"}
-
-    with pytest.raises(ParserError, match="missing required 'map' field in config"):
-        _parse_config(data)
-
-
 @pytest.mark.parametrize(
     "config_content, expected_error",
     [
@@ -70,6 +53,30 @@ def test_parse_map_succeeds_with_valid_str():
     assert isinstance(dst, tuple)
     assert src == (1, 1)
     assert dst == (2, 3)
+
+
+def test_parse_config_succeeds_with_valid_data():
+    data = {"map": MAP_STR, "heuristic": "euclidean"}
+    cfg = _parse_config(data)
+
+    assert isinstance(cfg, Config)
+    assert isinstance(cfg.map, Map)
+    assert cfg.source == (1, 1)
+    assert cfg.dest == (2, 3)
+
+
+@pytest.mark.parametrize(
+    "config_data, missing_field",
+    [
+        ({"heuristic": "manhattan"}, "map"),
+        ({"map": MAP_STR}, "heuristic"),
+    ],
+)
+def test_parse_config_fails_with_missing_fields(config_data, missing_field):
+    with pytest.raises(ParserError) as exc:
+        _parse_config(config_data)
+
+    assert missing_field in str(exc.value)
 
 
 def test_parse_map_replaces_source_and_destination_with_spaces():
@@ -142,7 +149,6 @@ def test_parse_map_replaces_source_and_destination_with_spaces():
         ),
     ],
 )
-# fmt: on
 def test_parse_map_raises_parser_error(map_str: str, expected_error: str):
     with pytest.raises(ParserError, match=expected_error):
         _parse_map(map_str)

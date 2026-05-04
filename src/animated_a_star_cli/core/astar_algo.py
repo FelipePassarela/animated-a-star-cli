@@ -23,13 +23,11 @@ class AStarAlgo:
 
         self._g = np.full_like(grid, np.inf, dtype=np.float64)
         self._f = np.full_like(grid, np.inf, dtype=np.float64)
-        self._h = lambda x: abs(x[0] - self._dest[0]) + abs(
-            x[1] - self._dest[1]
-        )  # TODO: extract to heuristic module
+        self._h = config.heuristic
         self._parents = np.full((*grid.shape, 2), -1)
 
         self._g[self._source] = 0.0
-        self._f[self._source] = self._h(self._source)
+        self._f[self._source] = self._h(self._source, self._dest)
         source_cost = (self._f[self._source], *self._source)
         heapq.heappush(self._opens, source_cost)
 
@@ -70,7 +68,7 @@ class AStarAlgo:
             self._g[neigh] = new_g
             self._parents[neigh] = self._current
 
-        self._f[neigh] = self._g[neigh] + self._h(neigh)
+        self._f[neigh] = self._g[neigh] + self._h(neigh, self._dest)
 
     def _neighbours(self, cell: tuple[int, int]) -> Generator[tuple[int, int]]:
         adjacent_moves = [(-1, 0), (1, 0), (0, -1), (0, 1)]

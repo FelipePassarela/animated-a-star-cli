@@ -32,9 +32,11 @@ def load_config(path: Path = CONFIG_PATH) -> Config:
 def _parse_config(data: dict) -> Config:
     if "map" not in data:
         raise ParserError("missing required 'map' field in config")
+    if "heuristic" not in data:
+        raise ParserError("missing required 'heuristic' field in config")
 
     map, source, dest = _parse_map(data["map"])
-    return Config(map=map, source=source, dest=dest)
+    return Config(map=map, source=source, dest=dest, heuristic=data["heuristic"])
 
 
 def _parse_map(map_str: str) -> tuple[Map, tuple[int, int], tuple[int, int]]:
