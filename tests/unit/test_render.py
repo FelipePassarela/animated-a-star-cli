@@ -4,6 +4,7 @@ import pytest
 
 from animated_a_star_cli.core.astar_state import AStarState
 from animated_a_star_cli.core.config import Config
+from animated_a_star_cli.core.heuristic import euclidean
 from animated_a_star_cli.core.map import Map
 from animated_a_star_cli.ui.render import draw
 from animated_a_star_cli.ui.render_context import RenderContext
@@ -20,7 +21,9 @@ grid = [
 @pytest.fixture
 def render_ctx() -> RenderContext:
     map_obj = Map(grid)
-    config = Config(map=map_obj, source=(1, 1), dest=(3, 1))
+    config = Config(
+        map=map_obj, source=(1, 1), dest=(3, 1), heuristic=euclidean, delay=32
+    )
     return RenderContext(cfg=config)
 
 

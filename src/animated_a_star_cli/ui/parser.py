@@ -35,6 +35,8 @@ def _parse_config(data: dict) -> Config:
         raise ParserError("missing required 'map' field in config")
     if "heuristic" not in data:
         raise ParserError("missing required 'heuristic' field in config")
+    if "delay" not in data:
+        raise ParserError("missing required 'delay' field in config")
 
     map, source, dest = _parse_map(data["map"])
 
@@ -46,7 +48,13 @@ def _parse_config(data: dict) -> Config:
         case _:
             raise ParserError(f"unsupported heuristic '{data['heuristic']}'")
 
-    return Config(map=map, source=source, dest=dest, heuristic=data["heuristic"])
+    return Config(
+        map=map,
+        source=source,
+        dest=dest,
+        delay=data["delay"],
+        heuristic=data["heuristic"],
+    )
 
 
 def _parse_map(map_str: str) -> tuple[Map, tuple[int, int], tuple[int, int]]:
