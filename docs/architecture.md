@@ -15,7 +15,7 @@ Responsibilities include:
 * **A* algorithm execution** (incremental, step-by-step)
 * **State management** of the search process (`AStarState`)
 * **Grid representation** and access (`Map`)
-* **Application orchestration** (`AppState`), coordinating the algorithm over time
+* **Execution Orchestration** (`AStarRunner`), coordinating the algorithm execution over time
 * **Heuristic functions** used during pathfinding
 
 This layer operates purely on structured data and does not depend on external systems.
