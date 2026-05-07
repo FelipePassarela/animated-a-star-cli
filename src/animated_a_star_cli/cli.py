@@ -1,14 +1,14 @@
 import sys
 
 from animated_a_star_cli.core import config
-from animated_a_star_cli.core.astar_algo import AStarAlgo
+from animated_a_star_cli.core.astar_runner import AStarRunner
 from animated_a_star_cli.ui import parser, render
 from animated_a_star_cli.ui.render_context import RenderContext
 
 
 def main():
     cfg = _load_config()
-    astar = AStarAlgo(cfg)
+    astar = AStarRunner(cfg)
 
     while True:
         print("\033[H\033[J", end="")  # Clear the terminal
