@@ -20,7 +20,7 @@ grid = [
 @pytest.fixture
 def render_ctx() -> RenderContext:
     map_obj = Map(grid)
-    config = Config(map=map_obj, source=(1, 1), dest=(3, 1))
+    config = Config(map=map_obj, source=(1, 1), dest=(3, 1), delay=32)
     return RenderContext(cfg=config)
 
 

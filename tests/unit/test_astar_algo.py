@@ -18,7 +18,7 @@ def astar() -> AStarAlgo:
         "#####",
     ]
     map = Map(grid)
-    config = Config(map=map, source=(1, 1), dest=(3, 1))
+    config = Config(map=map, source=(1, 1), dest=(3, 1), delay=32)
     return AStarAlgo(config)
 
 
@@ -33,7 +33,7 @@ def astar_no_path() -> AStarAlgo:
         "#####",
     ]
     map = Map(grid)
-    config = Config(map=map, source=(1, 1), dest=(3, 3))
+    config = Config(map=map, source=(1, 1), dest=(3, 3), delay=32)
     return AStarAlgo(config)
 
 
@@ -45,7 +45,7 @@ def astar_single_cell() -> AStarAlgo:
         "###",
     ]
     map = Map(grid)
-    config = Config(map=map, source=(1, 1), dest=(1, 1))
+    config = Config(map=map, source=(1, 1), dest=(1, 1), delay=32)
     astar = AStarAlgo(config)
     return astar
 

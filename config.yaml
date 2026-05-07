@@ -9,3 +9,4 @@ map: |
   ###########
 
 heuristic: manhattan
+delay: 32  # milliseconds

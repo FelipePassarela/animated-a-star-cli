@@ -4,6 +4,7 @@ from pathlib import Path
 import pytest
 
 from animated_a_star_cli.core.config import Config
+from animated_a_star_cli.core.heuristic import euclidean
 from animated_a_star_cli.core.map import Map
 from animated_a_star_cli.ui.parser import (
     ParserError,
@@ -56,11 +57,14 @@ def test_parse_map_succeeds_with_valid_str():
 
 
 def test_parse_config_succeeds_with_valid_data():
-    data = {"map": MAP_STR, "heuristic": "euclidean"}
+    data = {"map": MAP_STR, "heuristic": "euclidean", "delay": 32}
     cfg = _parse_config(data)
 
     assert isinstance(cfg, Config)
     assert isinstance(cfg.map, Map)
+    assert isinstance(cfg.heuristic, type(lambda: None))
+    assert cfg.heuristic == euclidean
+    assert cfg.delay == 32
     assert cfg.source == (1, 1)
     assert cfg.dest == (2, 3)
 
@@ -70,6 +74,7 @@ def test_parse_config_succeeds_with_valid_data():
     [
         ({"heuristic": "manhattan"}, "map"),
         ({"map": MAP_STR}, "heuristic"),
+        ({"map": MAP_STR, "heuristic": "manhattan"}, "delay"),
     ],
 )
 def test_parse_config_fails_with_missing_fields(config_data, missing_field):
@@ -80,7 +85,7 @@ def test_parse_config_fails_with_missing_fields(config_data, missing_field):
 
 
 def test_parse_config_fails_with_unsupported_heuristic():
-    data = {"map": MAP_STR, "heuristic": "unsupported_heuristic"}
+    data = {"map": MAP_STR, "heuristic": "unsupported_heuristic", "delay": 32}
 
     with pytest.raises(ParserError) as exc:
         _parse_config(data)
