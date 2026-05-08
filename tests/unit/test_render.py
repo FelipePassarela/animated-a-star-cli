@@ -33,7 +33,11 @@ def draw_and_assert(
     expected_heuristic: str = "Euclidean",
 ):
     output = draw_to_string(render_ctx)
-    expected = f"{expected_map_output}\nHeuristic: {expected_heuristic}"
+
+    expected = f"{expected_map_output}\n"
+    if render_ctx.astar_state is not None:
+        expected += f"Heuristic: {expected_heuristic}"
+
     assert output == expected
 
 

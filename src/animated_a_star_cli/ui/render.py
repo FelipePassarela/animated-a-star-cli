@@ -26,7 +26,9 @@ def draw_to_string(ctx: RenderContext) -> str:
     map_grid[config.dest] = "x"
 
     sprite = "\n".join("".join(row) for row in map_grid) + "\n"
-    sprite += _heuristic_to_string(config.heuristic)
+    if ctx.astar_state is not None:
+        sprite += _heuristic_to_string(config.heuristic)
+
     return sprite
 
 
