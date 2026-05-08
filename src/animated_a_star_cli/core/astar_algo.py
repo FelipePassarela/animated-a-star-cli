@@ -35,6 +35,8 @@ class AStarAlgo:
         if self._state.finished:
             return self._build_path(self._current)
 
+        self._state.current_step += 1
+
         if not self._opens:
             self._state.finished = True
             return self._state

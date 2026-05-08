@@ -102,3 +102,9 @@ def test_step_returns_single_cell_path_when_source_equals_dest(
 ):
     state = astar_single_cell.step()
     assert state.path == [(1, 1)]
+
+
+def test_step_increments_step_count(astar: AStarAlgo):
+    assert astar.step().current_step == 1
+    assert astar.step().current_step == 2
+    assert astar.step().current_step == 3
