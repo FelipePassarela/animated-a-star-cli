@@ -4,7 +4,7 @@ import pytest
 
 from animated_a_star_cli.core.astar_state import AStarState
 from animated_a_star_cli.core.config import Config
-from animated_a_star_cli.core.heuristic import euclidean
+from animated_a_star_cli.core.heuristic import euclidean, manhattan
 from animated_a_star_cli.core.map import Map
 from animated_a_star_cli.ui.render import draw
 from animated_a_star_cli.ui.render_context import RenderContext
@@ -39,6 +39,7 @@ def test_draw_renders_map_with_source_and_destination(
         ###  #
         #x ###
         ######
+        Heuristic: Euclidean
     """)
     assert captured.out == expected
 
@@ -56,6 +57,7 @@ def test_draw_renders_closed_cells(
         ###. #
         #x ###
         ######
+        Heuristic: Euclidean
     """)
     assert captured.out == expected
 
@@ -74,6 +76,7 @@ def test_draw_renders_path(
         ###* #
         #x*###
         ######
+        Heuristic: Euclidean
     """)
     assert captured.out == expected
 
@@ -95,6 +98,7 @@ def test_path_cells_take_precedence_over_closed_cells(
         ###* #
         #x ###
         ######
+        Heuristic: Euclidean
     """)
     assert captured.out == expected
 
@@ -118,6 +122,7 @@ def test_source_and_dest_dont_get_overriden(
         ###  #
         #x ###
         ######
+        Heuristic: Euclidean
     """)
     assert captured.out == expected
 
@@ -135,5 +140,27 @@ def test_draw_succeeds_with_none_astar_state(
         ###  #
         #x ###
         ######
+        Heuristic: Euclidean
     """)
     assert captured.out == expected
+
+
+def test_draw_renders_correct_heuristic_name(
+    capsys: pytest.CaptureFixture[str], render_ctx: RenderContext
+):
+    heurs = [euclidean, manhattan, lambda x, y: 0]
+    expected_heurs = ["Euclidean", "Manhattan", "Unknown"]
+
+    for heur, expected_heur in zip(heurs, expected_heurs):
+        render_ctx.cfg.heuristic = heur
+        draw(render_ctx)
+        captured = capsys.readouterr()
+        expected = textwrap.dedent(f"""\
+            ######
+            #o   #
+            ###  #
+            #x ###
+            ######
+            Heuristic: {expected_heur}
+        """)
+        assert captured.out == expected
