@@ -7,3 +7,4 @@ class AStarState:
     closed_cells: set[tuple[int, int]] = field(default_factory=set)
     path: list[tuple[int, int]] = field(default_factory=list)
     finished: bool = False
+    current_step: int = 0

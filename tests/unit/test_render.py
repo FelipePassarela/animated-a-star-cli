@@ -36,7 +36,8 @@ def draw_and_assert(
 
     expected = f"{expected_map_output}\n"
     if render_ctx.astar_state is not None:
-        expected += f"Heuristic: {expected_heuristic}"
+        expected += f"Steps: {render_ctx.astar_state.current_step}"
+        expected += f" Heuristic: {expected_heuristic}"
 
     assert output == expected
 

@@ -27,14 +27,19 @@ def draw_to_string(ctx: RenderContext) -> str:
 
     sprite = "\n".join("".join(row) for row in map_grid) + "\n"
     if ctx.astar_state is not None:
-        sprite += _heuristic_to_string(config.heuristic)
+        sprite += _formatted_steps(ctx.astar_state.current_step)
+        sprite += " " + _formatted_heuristic(config.heuristic)
 
     return sprite
 
 
-def _heuristic_to_string(h: Callable) -> str:
+def _formatted_heuristic(h: Callable) -> str:
     if h is euclidean:
         return "Heuristic: Euclidean"
     elif h is manhattan:
         return "Heuristic: Manhattan"
     return "Heuristic: Unknown"
+
+
+def _formatted_steps(current_step: int) -> str:
+    return f"Steps: {current_step}"
