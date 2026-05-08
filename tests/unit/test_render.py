@@ -1,4 +1,5 @@
 import textwrap
+from collections.abc import Callable
 
 import pytest
 
@@ -17,6 +18,27 @@ grid = [
     "######",
 ]
 
+BASE_MAP_OUTPUT = textwrap.dedent("""\
+    ######
+    #o   #
+    ###  #
+    #x ###
+    ######
+""")
+
+
+def draw_and_assert(
+    capsys: pytest.CaptureFixture[str],
+    render_ctx: RenderContext,
+    *,
+    expected_map_output: str = BASE_MAP_OUTPUT,
+    expected_heuristic: str = "Euclidean",
+):
+    draw(render_ctx)
+    captured = capsys.readouterr()
+    expected = expected_map_output + f"Heuristic: {expected_heuristic}\n"
+    assert captured.out == expected
+
 
 @pytest.fixture
 def render_ctx() -> RenderContext:
@@ -27,140 +49,92 @@ def render_ctx() -> RenderContext:
     return RenderContext(cfg=config)
 
 
-def test_draw_renders_map_with_source_and_destination(
-    capsys: pytest.CaptureFixture[str], render_ctx: RenderContext
-):
-    draw(render_ctx)
+class TestStaticRendering:
+    @staticmethod
+    def test_draw_renders_map_with_source_and_destination(
+        capsys: pytest.CaptureFixture[str], render_ctx: RenderContext
+    ):
+        draw_and_assert(capsys, render_ctx)
 
-    captured = capsys.readouterr()
-    expected = textwrap.dedent("""\
-        ######
-        #o   #
-        ###  #
-        #x ###
-        ######
-        Heuristic: Euclidean
-    """)
-    assert captured.out == expected
-
-
-def test_draw_renders_closed_cells(
-    capsys: pytest.CaptureFixture[str], render_ctx: RenderContext
-):
-    render_ctx.astar_state = AStarState(closed_cells={(1, 4), (2, 3)})
-    draw(render_ctx)
-
-    captured = capsys.readouterr()
-    expected = textwrap.dedent("""\
-        ######
-        #o  .#
-        ###. #
-        #x ###
-        ######
-        Heuristic: Euclidean
-    """)
-    assert captured.out == expected
+    @pytest.mark.parametrize(
+        "heuristic, expected_heuristic",
+        [
+            (euclidean, "Euclidean"),
+            (manhattan, "Manhattan"),
+            (lambda x, y: 0, "Unknown"),
+        ],
+    )
+    @staticmethod
+    def test_draw_renders_correct_heuristic_name(
+        capsys: pytest.CaptureFixture[str],
+        render_ctx: RenderContext,
+        heuristic: Callable,
+        expected_heuristic: str,
+    ):
+        render_ctx.cfg.heuristic = heuristic
+        draw_and_assert(capsys, render_ctx, expected_heuristic=expected_heuristic)
 
 
-def test_draw_renders_path(
-    capsys: pytest.CaptureFixture[str], render_ctx: RenderContext
-):
-    render_ctx.astar_state = AStarState(path=[(1, 2), (1, 3), (2, 3), (3, 2)])
-
-    draw(render_ctx)
-
-    captured = capsys.readouterr()
-    expected = textwrap.dedent("""\
+class TestPathRendering:
+    EXPECTED_PATH_OUTPUT = textwrap.dedent("""\
         ######
         #o** #
         ###* #
         #x*###
         ######
-        Heuristic: Euclidean
     """)
-    assert captured.out == expected
-
-
-def test_path_cells_take_precedence_over_closed_cells(
-    capsys: pytest.CaptureFixture[str], render_ctx: RenderContext
-):
-    render_ctx.astar_state = AStarState(
-        closed_cells={(1, 2), (1, 3), (2, 3)},
-        path=[(1, 2), (1, 3), (2, 3)],
-    )
-
-    draw(render_ctx)
-
-    captured = capsys.readouterr()
-    expected = textwrap.dedent("""\
+    EXPECTED_CLOSEDS_CELLS_OUTPUT = textwrap.dedent("""\
         ######
-        #o** #
-        ###* #
+        #o  .#
+        ###. #
         #x ###
         ######
-        Heuristic: Euclidean
     """)
-    assert captured.out == expected
+    PATH_CELLS = [(1, 2), (1, 3), (2, 3), (3, 2)]
+
+    def test_draw_renders_path(
+        self, capsys: pytest.CaptureFixture[str], render_ctx: RenderContext
+    ):
+        render_ctx.astar_state = AStarState(path=self.PATH_CELLS)
+        draw_and_assert(
+            capsys, render_ctx, expected_map_output=self.EXPECTED_PATH_OUTPUT
+        )
+
+    def test_draw_renders_closed_cells(
+        self, capsys: pytest.CaptureFixture[str], render_ctx: RenderContext
+    ):
+        render_ctx.astar_state = AStarState(closed_cells={(1, 4), (2, 3)})
+        draw_and_assert(
+            capsys, render_ctx, expected_map_output=self.EXPECTED_CLOSEDS_CELLS_OUTPUT
+        )
+
+    def test_path_cells_take_precedence_over_closed_cells(
+        self, capsys: pytest.CaptureFixture[str], render_ctx: RenderContext
+    ):
+        render_ctx.astar_state = AStarState(
+            closed_cells=set(self.PATH_CELLS),
+            path=self.PATH_CELLS,
+        )
+        draw_and_assert(
+            capsys, render_ctx, expected_map_output=self.EXPECTED_PATH_OUTPUT
+        )
+
+    def test_source_and_dest_dont_get_overriden(
+        self, capsys: pytest.CaptureFixture[str], render_ctx: RenderContext
+    ):
+        render_ctx.cfg.source = (1, 1)
+        render_ctx.cfg.dest = (3, 1)
+        render_ctx.astar_state = AStarState(
+            closed_cells={(1, 1), (3, 1)},
+            path=[(1, 1), (3, 1)],
+        )
+        draw_and_assert(capsys, render_ctx)
 
 
-def test_source_and_dest_dont_get_overriden(
-    capsys: pytest.CaptureFixture[str], render_ctx: RenderContext
-):
-    render_ctx.cfg.source = (1, 1)
-    render_ctx.cfg.dest = (3, 1)
-    render_ctx.astar_state = AStarState(
-        closed_cells={(1, 1), (3, 1)},
-        path=[(1, 1), (3, 1)],
-    )
-
-    draw(render_ctx)
-
-    captured = capsys.readouterr()
-    expected = textwrap.dedent("""\
-        ######
-        #o   #
-        ###  #
-        #x ###
-        ######
-        Heuristic: Euclidean
-    """)
-    assert captured.out == expected
-
-
-def test_draw_succeeds_with_none_astar_state(
-    capsys: pytest.CaptureFixture[str], render_ctx: RenderContext
-):
-    render_ctx.astar_state = None
-    draw(render_ctx)
-
-    captured = capsys.readouterr()
-    expected = textwrap.dedent("""\
-        ######
-        #o   #
-        ###  #
-        #x ###
-        ######
-        Heuristic: Euclidean
-    """)
-    assert captured.out == expected
-
-
-def test_draw_renders_correct_heuristic_name(
-    capsys: pytest.CaptureFixture[str], render_ctx: RenderContext
-):
-    heurs = [euclidean, manhattan, lambda x, y: 0]
-    expected_heurs = ["Euclidean", "Manhattan", "Unknown"]
-
-    for heur, expected_heur in zip(heurs, expected_heurs):
-        render_ctx.cfg.heuristic = heur
-        draw(render_ctx)
-        captured = capsys.readouterr()
-        expected = textwrap.dedent(f"""\
-            ######
-            #o   #
-            ###  #
-            #x ###
-            ######
-            Heuristic: {expected_heur}
-        """)
-        assert captured.out == expected
+class TestEdgeCases:
+    @staticmethod
+    def test_draw_succeeds_with_none_astar_state(
+        capsys: pytest.CaptureFixture[str], render_ctx: RenderContext
+    ):
+        render_ctx.astar_state = None
+        draw_and_assert(capsys, render_ctx)
