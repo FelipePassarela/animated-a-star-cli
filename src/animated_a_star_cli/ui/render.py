@@ -1,11 +1,40 @@
 from collections.abc import Callable
 
+from rich import print as rprint
+from rich.layout import Layout
+from rich.panel import Panel
+from rich.text import Text
+
 from animated_a_star_cli.core.heuristic import euclidean, manhattan
 from animated_a_star_cli.ui.render_context import RenderContext
 
 
 def draw(ctx: RenderContext):
-    print(draw_to_string(ctx))
+    layout = Layout(name="root")
+    layout.split_column(
+        Layout(name="map"),
+        Layout(name="status"),
+    )
+
+    map_str = draw_to_string(ctx)
+    map_panel = Panel(
+        Text(map_str),
+        title="A* Pathfinding Visualization",
+    )
+    layout["map"].update(map_panel)
+
+    if ctx.astar_state is not None:
+        status_text = Text(
+            f"{_formatted_steps(ctx.astar_state.current_step)} | "
+            f"{_formatted_heuristic(ctx.cfg.heuristic)}",
+            justify="center",
+        )
+    else:
+        status_text = Text("No A* state available", justify="center")
+    status_panel = Panel.fit(status_text)
+    layout["status"].update(status_panel)
+
+    rprint(layout)
 
 
 def draw_to_string(ctx: RenderContext) -> str:
@@ -26,9 +55,9 @@ def draw_to_string(ctx: RenderContext) -> str:
     map_grid[config.dest] = "x"
 
     sprite = "\n".join("".join(row) for row in map_grid) + "\n"
-    if ctx.astar_state is not None:
-        sprite += _formatted_steps(ctx.astar_state.current_step)
-        sprite += " " + _formatted_heuristic(config.heuristic)
+    # if ctx.astar_state is not None:
+    #     sprite += _formatted_steps(ctx.astar_state.current_step)
+    #     sprite += " " + _formatted_heuristic(config.heuristic)
 
     return sprite
 
