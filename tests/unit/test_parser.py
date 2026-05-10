@@ -2,16 +2,12 @@ import textwrap
 from pathlib import Path
 
 import pytest
+import yaml
 
 from animated_a_star_cli.core.config import Config
 from animated_a_star_cli.core.heuristic import euclidean
 from animated_a_star_cli.core.map import Map
-from animated_a_star_cli.ui.parser import (
-    ParserError,
-    _parse_config,
-    _parse_map,
-    load_config,
-)
+from animated_a_star_cli.ui.parser import ParserError, load_config
 
 MAP_STR = textwrap.dedent("""\
     #####
@@ -19,6 +15,12 @@ MAP_STR = textwrap.dedent("""\
     # #x#
     #####
 """)
+
+valid_config_data = {
+    "map": MAP_STR,
+    "heuristic": "euclidean",
+    "delay": 32,
+}
 
 
 @pytest.mark.parametrize(
@@ -46,23 +48,19 @@ def test_load_config_fails_with_missing_file(tmp_path: Path):
         load_config(path)
 
 
-def test_parse_map_succeeds_with_valid_str():
-    parsed_map, src, dst = _parse_map(MAP_STR)
+def test_load_config_succeeds_with_valid_data(tmp_path: Path):
+    path = tmp_path / "config.yaml"
+    path.write_text(yaml.safe_dump(valid_config_data))
 
-    assert isinstance(parsed_map, Map)
-    assert isinstance(src, tuple)
-    assert isinstance(dst, tuple)
-    assert src == (1, 1)
-    assert dst == (2, 3)
-
-
-def test_parse_config_succeeds_with_valid_data():
-    data = {"map": MAP_STR, "heuristic": "euclidean", "delay": 32}
-    cfg = _parse_config(data)
+    cfg = load_config(path)
 
     assert isinstance(cfg, Config)
     assert isinstance(cfg.map, Map)
     assert isinstance(cfg.heuristic, type(lambda: None))
+    assert isinstance(cfg.delay, int)
+    assert isinstance(cfg.source, tuple)
+    assert isinstance(cfg.dest, tuple)
+
     assert cfg.heuristic == euclidean
     assert cfg.delay == 32
     assert cfg.source == (1, 1)
@@ -70,16 +68,22 @@ def test_parse_config_succeeds_with_valid_data():
 
 
 @pytest.mark.parametrize(
-    "config_data, missing_field",
+    "missing_field",
     [
-        ({"heuristic": "manhattan"}, "map"),
-        ({"map": MAP_STR}, "heuristic"),
-        ({"map": MAP_STR, "heuristic": "manhattan"}, "delay"),
+        "map",
+        "heuristic",
+        "delay",
     ],
 )
-def test_parse_config_fails_with_missing_fields(config_data, missing_field):
+def test_load_config_fails_with_missing_fields(tmp_path: Path, missing_field: str):
+    config_data = valid_config_data.copy()
+    config_data.pop(missing_field)
+
+    path = tmp_path / "config.yaml"
+    path.write_text(yaml.safe_dump(config_data))
+
     with pytest.raises(ParserError) as exc:
-        _parse_config(config_data)
+        load_config(path)
 
     assert missing_field in str(exc.value)
 
@@ -94,31 +98,44 @@ def test_parse_config_fails_with_missing_fields(config_data, missing_field):
         ("not_a_number", "delay must be an integer"),
     ],
 )
-def test_parse_config_fails_with_invalid_delay(delay, expected_error):
-    data = {"map": MAP_STR, "heuristic": "euclidean", "delay": delay}
+def test_load_config_fails_with_invalid_delay(
+    tmp_path: Path, delay: int | float | str, expected_error: str
+):
+    config_data = valid_config_data.copy()
+    config_data["delay"] = delay  # ty:ignore[invalid-assignment]
+
+    path = tmp_path / "config.yaml"
+    path.write_text(yaml.safe_dump(config_data))
 
     with pytest.raises(ParserError) as exc:
-        _parse_config(data)
+        load_config(path)
 
     assert expected_error in str(exc.value)
 
 
-def test_parse_config_fails_with_unsupported_heuristic():
-    data = {"map": MAP_STR, "heuristic": "unsupported_heuristic", "delay": 32}
+def test_load_config_fails_with_unsupported_heuristic(tmp_path: Path):
+    config_data = valid_config_data.copy()
+    config_data["heuristic"] = "unsupported_heuristic"
+
+    path = tmp_path / "config.yaml"
+    path.write_text(yaml.safe_dump(config_data))
 
     with pytest.raises(ParserError) as exc:
-        _parse_config(data)
+        load_config(path)
 
     assert "unsupported heuristic" in str(exc.value)
 
 
-def test_parse_map_replaces_source_and_destination_with_spaces():
-    parsed_map, src, dst = _parse_map(MAP_STR)
+def test_load_config_replaces_source_and_destination_with_spaces(tmp_path: Path):
+    path = tmp_path / "config.yaml"
+    path.write_text(yaml.safe_dump(valid_config_data))
 
-    assert src == (1, 1)
-    assert dst == (2, 3)
-    assert parsed_map.at(1, 1) == " "
-    assert parsed_map.at(2, 3) == " "
+    cfg = load_config(path)
+
+    assert cfg.source == (1, 1)
+    assert cfg.dest == (2, 3)
+    assert cfg.map.at(1, 1) == " "
+    assert cfg.map.at(2, 3) == " "
 
 
 @pytest.mark.parametrize(
@@ -182,6 +199,14 @@ def test_parse_map_replaces_source_and_destination_with_spaces():
         ),
     ],
 )
-def test_parse_map_raises_parser_error(map_str: str, expected_error: str):
+def test_load_config_raises_parser_error(
+    tmp_path: Path, map_str: str, expected_error: str
+):
+    config_data = valid_config_data.copy()
+    config_data["map"] = map_str
+
+    path = tmp_path / "config.yaml"
+    path.write_text(yaml.safe_dump(config_data))
+
     with pytest.raises(ParserError, match=expected_error):
-        _parse_map(map_str)
+        load_config(path)
