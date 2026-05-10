@@ -1,7 +1,8 @@
 from collections.abc import Callable
 
 from rich import print as rprint
-from rich.layout import Layout
+from rich.align import Align
+from rich.console import Group
 from rich.panel import Panel
 from rich.text import Text
 
@@ -10,18 +11,10 @@ from animated_a_star_cli.ui.render_context import RenderContext
 
 
 def draw(ctx: RenderContext):
-    layout = Layout(name="root")
-    layout.split_column(
-        Layout(name="map"),
-        Layout(name="status"),
-    )
-
     map_str = draw_to_string(ctx)
     map_panel = Panel(
-        Text(map_str),
-        title="A* Pathfinding Visualization",
+        Text(map_str, no_wrap=True), title="A* Pathfinding Visualization", expand=False
     )
-    layout["map"].update(map_panel)
 
     if ctx.astar_state is not None:
         status_text = Text(
@@ -31,10 +24,11 @@ def draw(ctx: RenderContext):
         )
     else:
         status_text = Text("No A* state available", justify="center")
-    status_panel = Panel.fit(status_text)
-    layout["status"].update(status_panel)
 
-    rprint(layout)
+    status_panel = Panel(status_text, expand=False)
+    content = Group(map_panel, status_panel)
+
+    rprint(Align.center(content, vertical="middle"))
 
 
 def draw_to_string(ctx: RenderContext) -> str:
