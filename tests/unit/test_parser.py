@@ -84,6 +84,25 @@ def test_parse_config_fails_with_missing_fields(config_data, missing_field):
     assert missing_field in str(exc.value)
 
 
+@pytest.mark.parametrize(
+    "delay, expected_error",
+    [
+        (-1, "delay must be non-negative"),
+        (-999, "delay must be non-negative"),
+        (-0.001, "delay must be an integer"),
+        (32.3, "delay must be an integer"),
+        ("not_a_number", "delay must be an integer"),
+    ],
+)
+def test_parse_config_fails_with_invalid_delay(delay, expected_error):
+    data = {"map": MAP_STR, "heuristic": "euclidean", "delay": delay}
+
+    with pytest.raises(ParserError) as exc:
+        _parse_config(data)
+
+    assert expected_error in str(exc.value)
+
+
 def test_parse_config_fails_with_unsupported_heuristic():
     data = {"map": MAP_STR, "heuristic": "unsupported_heuristic", "delay": 32}
 

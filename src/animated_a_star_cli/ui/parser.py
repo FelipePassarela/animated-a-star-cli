@@ -39,6 +39,7 @@ def _parse_config(data: dict) -> Config:
         raise ParserError("missing required 'delay' field in config")
 
     map, source, dest = _parse_map(data["map"])
+    delay = _check_valid_delay(data["delay"])
 
     match data["heuristic"]:
         case "euclidean":
@@ -52,7 +53,7 @@ def _parse_config(data: dict) -> Config:
         map=map,
         source=source,
         dest=dest,
-        delay=data["delay"],
+        delay=delay,
         heuristic=data["heuristic"],
     )
 
@@ -96,3 +97,11 @@ def _check_valid_map(
     dest = np.argwhere(map_array == "x")[0]
 
     return map_array, tuple(source), tuple(dest)
+
+
+def _check_valid_delay(delay: int | str) -> int:
+    if not isinstance(delay, int):
+        raise ParserError("delay must be an integer")
+    if delay < 0:
+        raise ParserError("delay must be non-negative")
+    return delay
