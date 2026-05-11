@@ -22,7 +22,10 @@ def load_config(path: Path = CONFIG_PATH) -> Config:
     if not content.strip():
         raise ParserError("config file is empty")
 
-    data = yaml.safe_load(content)
+    try:
+        data = yaml.safe_load(content)
+    except yaml.YAMLError:
+        raise ParserError("invalid YAML format.")
 
     if not isinstance(data, dict):
         raise ParserError("invalid config format. expected a dictionary")

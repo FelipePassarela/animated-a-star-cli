@@ -105,6 +105,8 @@ class TestValidation:
                 "- just a list\n- not a dict",
                 "invalid config format. expected a dictionary",
             ),
+            ("not: a valid: yaml: content", "invalid YAML format"),
+            ("map: [unclosed", "invalid YAML format"),
         ],
     )
     @staticmethod
