@@ -1,11 +1,12 @@
 import textwrap
+from collections.abc import Callable
 from pathlib import Path
 
 import pytest
 import yaml
 
 from animated_a_star_cli.core.config import Config
-from animated_a_star_cli.core.heuristic import euclidean
+from animated_a_star_cli.core.heuristic import euclidean, manhattan
 from animated_a_star_cli.core.map import Map
 from animated_a_star_cli.ui.parser import ParserError, load_config
 
@@ -61,6 +62,38 @@ class TestParsing:
         assert cfg.dest == (2, 3)
         assert cfg.map.at(1, 1) == " "
         assert cfg.map.at(2, 3) == " "
+
+    @pytest.mark.parametrize(
+        "heuristic, expected_func",
+        [
+            ("euclidean", euclidean),
+            ("manhattan", manhattan),
+        ],
+    )
+    @staticmethod
+    def test_load_config_succeeds_with_supported_heuristics(
+        heuristic: str, expected_func: Callable, tmp_path: Path, valid_config_data: dict
+    ):
+        config_data = valid_config_data.copy()
+        config_data["heuristic"] = heuristic
+        path = write_config(config_data, tmp_path)
+
+        cfg = load_config(path)
+
+        assert cfg.heuristic is expected_func
+
+    @pytest.mark.parametrize("delay", [0, 1, 32, 100, int(1e9)])
+    @staticmethod
+    def test_load_config_succeeds_with_valid_delay(
+        delay: int, tmp_path: Path, valid_config_data: dict
+    ):
+        config_data = valid_config_data.copy()
+        config_data["delay"] = delay
+        path = write_config(config_data, tmp_path)
+
+        cfg = load_config(path)
+
+        assert cfg.delay == delay
 
 
 class TestValidation:
