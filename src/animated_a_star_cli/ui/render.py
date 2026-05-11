@@ -12,23 +12,21 @@ def draw_to_string(ctx: RenderContext) -> str:
     config = ctx.cfg
     map_grid = config.map.grid.copy()
 
-    if ctx.astar_state is not None:
-        closed = ctx.astar_state.closed_cells
-        path = ctx.astar_state.path
-        if closed:
-            rows, cols = zip(*closed)
-            map_grid[rows, cols] = "."
-        if path:
-            rows, cols = zip(*path)
-            map_grid[rows, cols] = "*"
+    closed = ctx.astar_state.closed_cells
+    path = ctx.astar_state.path
+    if closed:
+        rows, cols = zip(*closed)
+        map_grid[rows, cols] = "."
+    if path:
+        rows, cols = zip(*path)
+        map_grid[rows, cols] = "*"
 
     map_grid[config.source] = "o"
     map_grid[config.dest] = "x"
 
     sprite = "\n".join("".join(row) for row in map_grid) + "\n"
-    if ctx.astar_state is not None:
-        sprite += _formatted_steps(ctx.astar_state.current_step)
-        sprite += " " + _formatted_heuristic(config.heuristic)
+    sprite += _formatted_steps(ctx.astar_state.current_step)
+    sprite += " " + _formatted_heuristic(config.heuristic)
 
     return sprite
 

@@ -48,7 +48,8 @@ def render_ctx() -> RenderContext:
     config = Config(
         map=map_obj, source=(1, 1), dest=(3, 1), heuristic=euclidean, delay=32
     )
-    return RenderContext(cfg=config)
+    astar_state = AStarState()
+    return RenderContext(cfg=config, astar_state=astar_state)
 
 
 class TestStaticRendering:
@@ -115,11 +116,4 @@ class TestPathRendering:
             closed_cells={(1, 1), (3, 1)},
             path=[(1, 1), (3, 1)],
         )
-        draw_and_assert(render_ctx)
-
-
-class TestEdgeCases:
-    @staticmethod
-    def test_draw_succeeds_with_none_astar_state(render_ctx: RenderContext):
-        render_ctx.astar_state = None
         draw_and_assert(render_ctx)

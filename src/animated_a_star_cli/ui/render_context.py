@@ -7,4 +7,4 @@ from animated_a_star_cli.core.config import Config
 @dataclass
 class RenderContext:
     cfg: Config
-    astar_state: AStarState | None = None
+    astar_state: AStarState
