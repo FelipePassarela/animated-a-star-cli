@@ -19,14 +19,4 @@ class Map:
 
     @property
     def grid(self):
-        return self._grid
-
-    def is_wall(self, i: int, j: int) -> bool:
-        rows, cols = self._grid.shape
-
-        if i < 0 or i >= rows:
-            return False
-        if j < 0 or j >= cols:
-            return False
-
-        return self._grid[i, j] == "#"
+        return self._grid.copy()
