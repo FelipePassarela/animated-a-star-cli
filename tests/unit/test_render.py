@@ -17,7 +17,6 @@ grid = [
     "#x ###",
     "######",
 ]
-
 BASE_MAP_OUTPUT = textwrap.dedent("""\
     ######
     #o   #
@@ -35,9 +34,8 @@ def draw_and_assert(
     output = draw_to_string(render_ctx)
 
     expected = f"{expected_map_output}\n"
-    if render_ctx.astar_state is not None:
-        expected += f"Steps: {render_ctx.astar_state.current_step}"
-        expected += f" Heuristic: {expected_heuristic}"
+    expected += f"Steps: {render_ctx.astar_state.current_step}"
+    expected += f" Heuristic: {expected_heuristic}"
 
     assert output == expected
 
@@ -67,9 +65,7 @@ class TestStaticRendering:
     )
     @staticmethod
     def test_draw_renders_correct_heuristic_name(
-        render_ctx: RenderContext,
-        heuristic: Callable,
-        expected_heuristic: str,
+        render_ctx: RenderContext, heuristic: Callable, expected_heuristic: str
     ):
         render_ctx.cfg.heuristic = heuristic
         draw_and_assert(render_ctx, expected_heuristic=expected_heuristic)
@@ -104,8 +100,7 @@ class TestPathRendering:
         self, render_ctx: RenderContext
     ):
         render_ctx.astar_state = AStarState(
-            closed_cells=set(self.PATH_CELLS),
-            path=self.PATH_CELLS,
+            closed_cells=set(self.PATH_CELLS), path=self.PATH_CELLS
         )
         draw_and_assert(render_ctx, expected_map_output=self.EXPECTED_PATH_OUTPUT)
 
@@ -113,7 +108,6 @@ class TestPathRendering:
         render_ctx.cfg.source = (1, 1)
         render_ctx.cfg.dest = (3, 1)
         render_ctx.astar_state = AStarState(
-            closed_cells={(1, 1), (3, 1)},
-            path=[(1, 1), (3, 1)],
+            closed_cells={(1, 1), (3, 1)}, path=[(1, 1), (3, 1)]
         )
         draw_and_assert(render_ctx)
