@@ -14,15 +14,15 @@ grid = [
     "######",
     "#o   #",
     "###  #",
-    "#x ###",
+    "#x  ##",
     "######",
 ]
 BASE_MAP_OUTPUT = textwrap.dedent("""\
-    ######
-    #o   #
-    ###  #
-    #x ###
-    ######""")
+    ┌────┐
+    │o   │
+    ├──  │
+    │x  ┌┤
+    └───┴┘""")
 
 
 def draw_and_assert(
@@ -47,7 +47,7 @@ def render_ctx() -> RenderContext:
         map=map_obj, source=(1, 1), dest=(3, 1), heuristic=euclidean, delay=32
     )
     astar_state = AStarState()
-    return RenderContext(cfg=config, astar_state=astar_state)
+    return RenderContext(cfg=config, astar_state=astar_state, theme=None)
 
 
 class TestStaticRendering:
@@ -73,18 +73,18 @@ class TestStaticRendering:
 
 class TestPathRendering:
     EXPECTED_PATH_OUTPUT = textwrap.dedent("""\
-        ######
-        #o** #
-        ###* #
-        #x*###
-        ######""")
+        ┌────┐
+        │o←╗ │
+        ├──║ │
+        │x←╝┌┤
+        └───┴┘""")
     EXPECTED_CLOSEDS_CELLS_OUTPUT = textwrap.dedent("""\
-        ######
-        #o  .#
-        ###. #
-        #x ###
-        ######""")
-    PATH_CELLS = [(1, 2), (1, 3), (2, 3), (3, 2)]
+        ┌────┐
+        │o  .│
+        ├──. │
+        │x  ┌┤
+        └───┴┘""")
+    PATH_CELLS = [(1, 2), (1, 3), (2, 3), (3, 3), (3, 2)]
 
     def test_draw_renders_path(self, render_ctx: RenderContext):
         render_ctx.astar_state = AStarState(path=self.PATH_CELLS)

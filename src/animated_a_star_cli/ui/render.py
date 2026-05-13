@@ -1,30 +1,31 @@
 from collections.abc import Callable
 
 import numpy as np
+from rich import print as rprint
 
 from animated_a_star_cli.core.heuristic import euclidean, manhattan
-from animated_a_star_cli.ui.cell_renderer import glyph_from_neighs
+from animated_a_star_cli.ui.glyph_renderer import glyph_from_neighs
 from animated_a_star_cli.ui.render_context import RenderContext
 
 
 def draw(ctx: RenderContext):
-    print(draw_to_string(ctx))
+    rprint(draw_to_string(ctx))
 
 
 def draw_to_string(ctx: RenderContext) -> str:
     config = ctx.cfg
     filled_map = _filled_map(ctx)
-    formatted_map = _renderable_map(filled_map)
+    renderable_str = _renderable_str(filled_map, ctx)
 
-    sprite = "\n".join("".join(row) for row in formatted_map) + "\n"
+    sprite = renderable_str
     sprite += _formatted_steps(ctx.astar_state.current_step)
     sprite += " " + _formatted_heuristic(config.heuristic)
 
     return sprite
 
 
-def _renderable_map(filled_map: np.ndarray) -> np.ndarray:
-    formatted_map = np.array(filled_map, dtype=str)
+def _renderable_str(filled_map: np.ndarray, ctx: RenderContext) -> str:
+    renderable_str = ""
 
     rows, cols = filled_map.shape
     for i in range(rows):
@@ -36,10 +37,18 @@ def _renderable_map(filled_map: np.ndarray) -> np.ndarray:
             left = filled_map[i, j - 1] if j > 0 else None
             right = filled_map[i, j + 1] if j < cols - 1 else None
 
-            glyph = glyph_from_neighs(center, up, down, left, right)
-            formatted_map[i, j] = glyph
+            glyph = glyph_from_neighs(
+                center,
+                up,
+                down,
+                left,
+                right,
+                theme=ctx.theme,
+            )
+            renderable_str += glyph
+        renderable_str += "\n"
 
-    return formatted_map
+    return renderable_str
 
 
 def _filled_map(ctx: RenderContext) -> np.ndarray:

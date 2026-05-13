@@ -1,3 +1,5 @@
+from animated_a_star_cli.ui.theme import Theme
+
 _WALL_DRAWING = {
     (False, False, False, False): "─",
     (False, False, False, True): "─",
@@ -38,13 +40,29 @@ def glyph_from_neighs(
     down: str | None,
     left: str | None,
     right: str | None,
+    theme: Theme | None = None,
 ) -> str:
     if center == "#":
-        return _from_wall(up, down, left, right)
-    elif center == "*":
-        return _from_path(up, down, left, right)
-    else:
-        return center
+        glyph = _from_wall(up, down, left, right)
+        return f"[{theme.wall_color}]{glyph}[/]" if theme else glyph
+
+    if center == "*":
+        glyph = _from_path(up, down, left, right)
+        return f"[{theme.path_color}]{glyph}[/]" if theme else glyph
+
+    if center == ".":
+        if theme:
+            return f"[{theme.closed_color}]{center}[/]"
+
+    if center == "o":
+        if theme:
+            return f"[{theme.source_color}]{center}[/]"
+
+    if center == "x":
+        if theme:
+            return f"[{theme.dest_color}]{center}[/]"
+
+    return center
 
 
 def _from_wall(

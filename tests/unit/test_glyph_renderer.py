@@ -1,6 +1,7 @@
 import pytest
 
-from animated_a_star_cli.ui.cell_renderer import glyph_from_neighs
+from animated_a_star_cli.ui.glyph_renderer import glyph_from_neighs
+from animated_a_star_cli.ui.theme import Theme
 
 
 class TestPath:
@@ -124,3 +125,34 @@ class TestUnknownNeighs:
     ):
         glyph = glyph_from_neighs("*", up, down, left, right)
         assert glyph == "?"
+
+
+class TestColoring:
+    GLYPH_COLORS = [
+        ("#", "red"),
+        ("*", "green"),
+        (".", "yellow"),
+        ("o", "blue"),
+        ("x", "magenta"),
+    ]
+
+    @pytest.mark.parametrize("center, color", GLYPH_COLORS)
+    def test_from_neighs_color_the_glyphs_when_theme_is_given(
+        self, center: str, color: str
+    ):
+        theme = Theme(
+            wall_color="red",
+            path_color="green",
+            closed_color="yellow",
+            source_color="blue",
+            dest_color="magenta",
+        )
+        glyph = glyph_from_neighs(center, " ", " ", " ", " ", theme=theme)
+        assert glyph.startswith(f"[{color}]") and glyph.endswith("[/]"), (
+            f"Glyph '{glyph}' is not colored with {color}"
+        )
+
+    @pytest.mark.parametrize("center", ["#", "*", ".", "o", "x"])
+    def test_from_neighs_does_not_color_glyphs_when_theme_is_none(self, center: str):
+        glyph = glyph_from_neighs(center, " ", " ", " ", " ", theme=None)
+        assert len(glyph) == 1, f"Glyph '{glyph}' should not be colored"
