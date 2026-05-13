@@ -1,4 +1,4 @@
-from animated_a_star_cli.core.astar_state import dataclass
+from dataclasses import dataclass
 
 
 @dataclass

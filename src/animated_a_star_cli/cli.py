@@ -3,7 +3,7 @@ import sys
 from animated_a_star_cli.core import config
 from animated_a_star_cli.core.astar_runner import AStarRunner
 from animated_a_star_cli.ui import parser, render
-from animated_a_star_cli.ui.render_context import RenderContext
+from animated_a_star_cli.ui.render.render_context import RenderContext
 
 
 def main():

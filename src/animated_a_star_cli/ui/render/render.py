@@ -4,8 +4,9 @@ import numpy as np
 from rich import print as rprint
 
 from animated_a_star_cli.core.heuristic import euclidean, manhattan
-from animated_a_star_cli.ui.glyph_renderer import glyph_from_neighs
-from animated_a_star_cli.ui.render_context import RenderContext
+
+from .glyph_renderer import glyph_from_neighs
+from .render_context import RenderContext
 
 
 def draw(ctx: RenderContext):

@@ -1,7 +1,6 @@
 import pytest
 
-from animated_a_star_cli.ui.glyph_renderer import glyph_from_neighs
-from animated_a_star_cli.ui.theme import Theme
+from animated_a_star_cli.ui.render import Theme, glyph_from_neighs
 
 
 class TestPath:

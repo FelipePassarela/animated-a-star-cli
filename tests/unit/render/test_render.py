@@ -7,8 +7,7 @@ from animated_a_star_cli.core.astar_state import AStarState
 from animated_a_star_cli.core.config import Config
 from animated_a_star_cli.core.heuristic import euclidean, manhattan
 from animated_a_star_cli.core.map import Map
-from animated_a_star_cli.ui.render import draw_to_string
-from animated_a_star_cli.ui.render_context import RenderContext
+from animated_a_star_cli.ui.render import RenderContext, draw_to_string
 
 grid = [
     "######",

@@ -1,4 +1,4 @@
-from animated_a_star_cli.ui.theme import Theme
+from .theme import Theme
 
 _WALL_DRAWING = {
     (False, False, False, False): "─",
