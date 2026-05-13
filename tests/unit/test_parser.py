@@ -1,13 +1,12 @@
 import textwrap
 from collections.abc import Callable
 from pathlib import Path
+from typing import Any
 
 import pytest
 import yaml
 
-from animated_a_star_cli.core.config import Config
 from animated_a_star_cli.core.heuristic import euclidean, manhattan
-from animated_a_star_cli.core.map import Map
 from animated_a_star_cli.ui.parser import ParserError, load_config
 
 
@@ -33,23 +32,20 @@ def write_config(config_data: dict, tmp_path: Path) -> Path:
 
 
 class TestParsing:
-    @staticmethod
-    def test_load_config_succeeds_with_valid_data(
-        tmp_path: Path, valid_config_data: dict
+    def assert_field(
+        self,
+        *,
+        field: str,
+        value: Any,
+        expected_value: Any,
+        valid_config_data: dict,
+        tmp_path: Path,
     ):
-        path = write_config(valid_config_data, tmp_path)
+        config_data = valid_config_data.copy()
+        config_data[field] = value
+        path = write_config(config_data, tmp_path)
         cfg = load_config(path)
-
-        assert isinstance(cfg, Config)
-        assert isinstance(cfg.map, Map)
-        assert isinstance(cfg.delay, int)
-        assert isinstance(cfg.source, tuple)
-        assert isinstance(cfg.dest, tuple)
-
-        assert cfg.heuristic is euclidean
-        assert cfg.delay == 32
-        assert cfg.source == (1, 1)
-        assert cfg.dest == (2, 3)
+        assert getattr(cfg, field) == expected_value
 
     @staticmethod
     def test_load_config_replaces_source_and_destination_with_spaces(
@@ -64,36 +60,34 @@ class TestParsing:
         assert cfg.map.at(2, 3) == " "
 
     @pytest.mark.parametrize(
-        "heuristic, expected_func",
-        [
-            ("euclidean", euclidean),
-            ("manhattan", manhattan),
-        ],
+        "heuristic, expected_func", [("euclidean", euclidean), ("manhattan", manhattan)]
     )
-    @staticmethod
     def test_load_config_succeeds_with_supported_heuristics(
-        heuristic: str, expected_func: Callable, tmp_path: Path, valid_config_data: dict
+        self,
+        heuristic: str,
+        expected_func: Callable,
+        tmp_path: Path,
+        valid_config_data: dict,
     ):
-        config_data = valid_config_data.copy()
-        config_data["heuristic"] = heuristic
-        path = write_config(config_data, tmp_path)
-
-        cfg = load_config(path)
-
-        assert cfg.heuristic is expected_func
+        self.assert_field(
+            field="heuristic",
+            value=heuristic,
+            expected_value=expected_func,
+            valid_config_data=valid_config_data,
+            tmp_path=tmp_path,
+        )
 
     @pytest.mark.parametrize("delay", [0, 1, 32, 100, int(1e9)])
-    @staticmethod
     def test_load_config_succeeds_with_valid_delay(
-        delay: int, tmp_path: Path, valid_config_data: dict
+        self, delay: int, tmp_path: Path, valid_config_data: dict
     ):
-        config_data = valid_config_data.copy()
-        config_data["delay"] = delay
-        path = write_config(config_data, tmp_path)
-
-        cfg = load_config(path)
-
-        assert cfg.delay == delay
+        self.assert_field(
+            field="delay",
+            value=delay,
+            expected_value=delay,
+            valid_config_data=valid_config_data,
+            tmp_path=tmp_path,
+        )
 
 
 class TestValidation:
@@ -129,6 +123,21 @@ class TestValidation:
         #x#
     """)
 
+    def assert_invalid_field_error(
+        self,
+        *,
+        field: str,
+        invalid_value: Any,
+        expected_error: str,
+        valid_config_data: dict,
+        tmp_path: Path,
+    ):
+        config_data = valid_config_data.copy()
+        config_data[field] = invalid_value
+        path = write_config(config_data, tmp_path)
+        with pytest.raises(ParserError, match=expected_error):
+            load_config(path)
+
     @pytest.mark.parametrize(
         "config_content, expected_error",
         [
@@ -142,9 +151,8 @@ class TestValidation:
             ("map: [unclosed", "invalid YAML format"),
         ],
     )
-    @staticmethod
     def test_load_config_fails_with_invalid_content(
-        tmp_path: Path, config_content: str, expected_error: str
+        self, tmp_path: Path, config_content: str, expected_error: str
     ):
         path = tmp_path / "config.yaml"
         path.write_text(config_content)
@@ -152,24 +160,15 @@ class TestValidation:
         with pytest.raises(ParserError, match=expected_error):
             load_config(path)
 
-    @staticmethod
-    def test_load_config_fails_with_missing_file(tmp_path: Path):
+    def test_load_config_fails_with_missing_file(self, tmp_path: Path):
         path = tmp_path / "nonexistent_config.yaml"
 
         with pytest.raises(FileNotFoundError):
             load_config(path)
 
-    @pytest.mark.parametrize(
-        "missing_field",
-        [
-            "map",
-            "heuristic",
-            "delay",
-        ],
-    )
-    @staticmethod
+    @pytest.mark.parametrize("missing_field", ["map", "heuristic", "delay"])
     def test_load_config_fails_with_missing_fields(
-        tmp_path: Path, missing_field: str, valid_config_data: dict
+        self, tmp_path: Path, missing_field: str, valid_config_data: dict
     ):
         config_data = valid_config_data.copy()
         config_data.pop(missing_field)
@@ -188,30 +187,31 @@ class TestValidation:
             ("not_a_number", "delay must be an integer"),
         ],
     )
-    @staticmethod
     def test_load_config_fails_with_invalid_delay(
+        self,
         tmp_path: Path,
         delay: int | float | str,
         expected_error: str,
         valid_config_data: dict,
     ):
-        config_data = valid_config_data.copy()
-        config_data["delay"] = delay
-        path = write_config(config_data, tmp_path)
+        self.assert_invalid_field_error(
+            field="delay",
+            invalid_value=delay,
+            expected_error=expected_error,
+            valid_config_data=valid_config_data,
+            tmp_path=tmp_path,
+        )
 
-        with pytest.raises(ParserError, match=expected_error):
-            load_config(path)
-
-    @staticmethod
     def test_load_config_fails_with_unsupported_heuristic(
-        tmp_path: Path, valid_config_data: dict
+        self, tmp_path: Path, valid_config_data: dict
     ):
-        config_data = valid_config_data.copy()
-        config_data["heuristic"] = "unsupported_heuristic"
-        path = write_config(config_data, tmp_path)
-
-        with pytest.raises(ParserError, match="unsupported heuristic"):
-            load_config(path)
+        self.assert_invalid_field_error(
+            field="heuristic",
+            invalid_value="unsupported_heuristic",
+            expected_error="unsupported heuristic",
+            valid_config_data=valid_config_data,
+            tmp_path=tmp_path,
+        )
 
     @pytest.mark.parametrize(
         "map_str, expected_error",
@@ -227,13 +227,13 @@ class TestValidation:
             (NO_SOURCE_MAP, "map must contain exactly one source 'o'"),
         ],
     )
-    @staticmethod
     def test_load_config_fails_with_invalid_map(
-        tmp_path: Path, map_str: str, expected_error: str, valid_config_data: dict
+        self, tmp_path: Path, map_str: str, expected_error: str, valid_config_data: dict
     ):
-        config_data = valid_config_data.copy()
-        config_data["map"] = map_str
-        path = write_config(config_data, tmp_path)
-
-        with pytest.raises(ParserError, match=expected_error):
-            load_config(path)
+        self.assert_invalid_field_error(
+            field="map",
+            invalid_value=map_str,
+            expected_error=expected_error,
+            valid_config_data=valid_config_data,
+            tmp_path=tmp_path,
+        )
