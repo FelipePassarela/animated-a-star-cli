@@ -14,13 +14,12 @@ def draw(ctx: RenderContext):
 
 
 def draw_to_string(ctx: RenderContext) -> str:
-    config = ctx.cfg
     filled_map = _filled_map(ctx)
     renderable_str = _renderable_str(filled_map, ctx)
 
     sprite = renderable_str
     sprite += _formatted_steps(ctx.astar_state.current_step)
-    sprite += " " + _formatted_heuristic(config.heuristic)
+    sprite += " " + _formatted_heuristic(ctx.heuristic)
 
     return sprite
 
@@ -53,8 +52,7 @@ def _renderable_str(filled_map: np.ndarray, ctx: RenderContext) -> str:
 
 
 def _filled_map(ctx: RenderContext) -> np.ndarray:
-    config = ctx.cfg
-    map_grid = np.array(config.map.grid, dtype=str)
+    map_grid = np.array(ctx.map.grid, dtype=str)
 
     closed = ctx.astar_state.closed_cells
     path = ctx.astar_state.path
@@ -65,8 +63,8 @@ def _filled_map(ctx: RenderContext) -> np.ndarray:
         rows, cols = zip(*path)
         map_grid[rows, cols] = "*"
 
-    map_grid[config.source] = "o"
-    map_grid[config.dest] = "x"
+    map_grid[ctx.source] = "o"
+    map_grid[ctx.dest] = "x"
 
     return map_grid
 

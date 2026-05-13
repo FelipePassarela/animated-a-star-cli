@@ -8,6 +8,15 @@ import yaml
 
 from animated_a_star_cli.core.heuristic import euclidean, manhattan
 from animated_a_star_cli.ui.parser import ParserError, load_config
+from animated_a_star_cli.ui.render import (
+    CATPPUCCIN,
+    DEFAULT_THEME,
+    DRACULA,
+    GRUVBOX,
+    MONOKAI,
+    NORD,
+    TOKYO_NIGHT,
+)
 
 
 @pytest.fixture
@@ -22,6 +31,7 @@ def valid_config_data() -> dict:
         "map": map,
         "heuristic": "euclidean",
         "delay": 32,
+        "theme": "default",
     }
 
 
@@ -85,6 +95,29 @@ class TestParsing:
             field="delay",
             value=delay,
             expected_value=delay,
+            valid_config_data=valid_config_data,
+            tmp_path=tmp_path,
+        )
+
+    @pytest.mark.parametrize(
+        "theme, expected_theme",
+        [
+            ("default", DEFAULT_THEME),
+            ("monokai", MONOKAI),
+            ("dracula", DRACULA),
+            ("nord", NORD),
+            ("tokyo-night", TOKYO_NIGHT),
+            ("catppuccin", CATPPUCCIN),
+            ("gruvbox", GRUVBOX),
+        ],
+    )
+    def test_load_config_succeeds_with_supported_theme(
+        self, theme: str, expected_theme: Any, tmp_path: Path, valid_config_data: dict
+    ):
+        self.assert_field(
+            field="theme",
+            value=theme,
+            expected_value=expected_theme,
             valid_config_data=valid_config_data,
             tmp_path=tmp_path,
         )
@@ -166,7 +199,7 @@ class TestValidation:
         with pytest.raises(FileNotFoundError):
             load_config(path)
 
-    @pytest.mark.parametrize("missing_field", ["map", "heuristic", "delay"])
+    @pytest.mark.parametrize("missing_field", ["map", "heuristic", "delay", "theme"])
     def test_load_config_fails_with_missing_fields(
         self, tmp_path: Path, missing_field: str, valid_config_data: dict
     ):
@@ -202,13 +235,14 @@ class TestValidation:
             tmp_path=tmp_path,
         )
 
-    def test_load_config_fails_with_unsupported_heuristic(
-        self, tmp_path: Path, valid_config_data: dict
+    @pytest.mark.parametrize("field", [("heuristic"), ("theme")])
+    def test_load_config_fails_with_unsupported_field(
+        self, field: str, tmp_path: Path, valid_config_data: dict
     ):
         self.assert_invalid_field_error(
-            field="heuristic",
-            invalid_value="unsupported_heuristic",
-            expected_error="unsupported heuristic",
+            field=field,
+            invalid_value=f"unsupported_{field}",
+            expected_error=f"unsupported {field}",
             valid_config_data=valid_config_data,
             tmp_path=tmp_path,
         )

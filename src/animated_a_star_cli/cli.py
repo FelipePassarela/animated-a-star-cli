@@ -14,7 +14,14 @@ def main():
         print("\033[H\033[J", end="")  # Clear the terminal
 
         state = astar.step()
-        render_ctx = RenderContext(cfg, state)
+        render_ctx = RenderContext(
+            map=cfg.map,
+            heuristic=cfg.heuristic,
+            astar_state=state,
+            source=cfg.source,
+            dest=cfg.dest,
+            theme=cfg.theme,
+        )
         render.draw(render_ctx)
 
         if state.finished:
