@@ -7,6 +7,7 @@ from animated_a_star_cli.core.astar_state import AStarState
 from animated_a_star_cli.core.config import Config
 from animated_a_star_cli.core.heuristic import euclidean
 from animated_a_star_cli.core.map import Map
+from animated_a_star_cli.ui.render import DEFAULT_THEME
 
 
 @pytest.fixture()
@@ -19,7 +20,14 @@ def astar() -> AStarAlgo:
         "#####",
     ]
     map = Map(grid)
-    config = Config(map=map, source=(1, 1), dest=(3, 1), heuristic=euclidean, delay=32)
+    config = Config(
+        map=map,
+        source=(1, 1),
+        dest=(3, 1),
+        heuristic=euclidean,
+        delay=32,
+        theme=DEFAULT_THEME,
+    )
     return AStarAlgo(config)
 
 
@@ -34,7 +42,14 @@ def astar_no_path() -> AStarAlgo:
         "#####",
     ]
     map = Map(grid)
-    config = Config(map=map, source=(1, 1), dest=(3, 3), heuristic=euclidean, delay=32)
+    config = Config(
+        map=map,
+        source=(1, 1),
+        dest=(3, 3),
+        heuristic=euclidean,
+        delay=32,
+        theme=DEFAULT_THEME,
+    )
     return AStarAlgo(config)
 
 
@@ -46,7 +61,14 @@ def astar_single_cell() -> AStarAlgo:
         "###",
     ]
     map = Map(grid)
-    config = Config(map=map, source=(1, 1), dest=(1, 1), heuristic=euclidean, delay=32)
+    config = Config(
+        map=map,
+        source=(1, 1),
+        dest=(1, 1),
+        heuristic=euclidean,
+        delay=32,
+        theme=DEFAULT_THEME,
+    )
     astar = AStarAlgo(config)
     return astar
 

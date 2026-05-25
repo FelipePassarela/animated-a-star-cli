@@ -4,7 +4,6 @@ from collections.abc import Callable
 import pytest
 
 from animated_a_star_cli.core.astar_state import AStarState
-from animated_a_star_cli.core.config import Config
 from animated_a_star_cli.core.heuristic import euclidean, manhattan
 from animated_a_star_cli.core.map import Map
 from animated_a_star_cli.ui.render import RenderContext, draw_to_string
@@ -41,12 +40,15 @@ def draw_and_assert(
 
 @pytest.fixture
 def render_ctx() -> RenderContext:
-    map_obj = Map(grid)
-    config = Config(
-        map=map_obj, source=(1, 1), dest=(3, 1), heuristic=euclidean, delay=32
-    )
     astar_state = AStarState()
-    return RenderContext(cfg=config, astar_state=astar_state, theme=None)
+    return RenderContext(
+        map=Map(grid),
+        heuristic=euclidean,
+        source=(1, 1),
+        dest=(3, 1),
+        astar_state=astar_state,
+        theme=None,
+    )
 
 
 class TestStaticRendering:
@@ -66,7 +68,7 @@ class TestStaticRendering:
     def test_draw_renders_correct_heuristic_name(
         render_ctx: RenderContext, heuristic: Callable, expected_heuristic: str
     ):
-        render_ctx.cfg.heuristic = heuristic
+        render_ctx.heuristic = heuristic
         draw_and_assert(render_ctx, expected_heuristic=expected_heuristic)
 
 
@@ -104,8 +106,8 @@ class TestPathRendering:
         draw_and_assert(render_ctx, expected_map_output=self.EXPECTED_PATH_OUTPUT)
 
     def test_source_and_dest_dont_get_overriden(self, render_ctx: RenderContext):
-        render_ctx.cfg.source = (1, 1)
-        render_ctx.cfg.dest = (3, 1)
+        render_ctx.source = (1, 1)
+        render_ctx.dest = (3, 1)
         render_ctx.astar_state = AStarState(
             closed_cells={(1, 1), (3, 1)}, path=[(1, 1), (3, 1)]
         )

@@ -7,6 +7,7 @@ from animated_a_star_cli import ROOT_DIR
 from animated_a_star_cli.core.config import Config
 from animated_a_star_cli.core.heuristic import euclidean, manhattan
 from animated_a_star_cli.core.map import Map
+from animated_a_star_cli.ui.render.theme import THEMES
 
 CONFIG_PATH = ROOT_DIR / "config.yaml"
 
@@ -34,12 +35,9 @@ def load_config(path: Path = CONFIG_PATH) -> Config:
 
 
 def _parse_config(data: dict) -> Config:
-    if "map" not in data:
-        raise ParserError("missing required 'map' field in config")
-    if "heuristic" not in data:
-        raise ParserError("missing required 'heuristic' field in config")
-    if "delay" not in data:
-        raise ParserError("missing required 'delay' field in config")
+    for field in ["map", "heuristic", "delay", "theme"]:
+        if field not in data:
+            raise ParserError(f"missing required '{field}' field in config")
 
     map, source, dest = _parse_map(data["map"])
     delay = _check_valid_delay(data["delay"])
@@ -52,12 +50,20 @@ def _parse_config(data: dict) -> Config:
         case _:
             raise ParserError(f"unsupported heuristic '{data['heuristic']}'")
 
+    theme = THEMES.get(data["theme"].lower())
+    if theme is None:
+        supported_themes = ", ".join(THEMES.keys())
+        raise ParserError(
+            f"unsupported theme '{data['theme']}'. Supported themes: {supported_themes}"
+        )
+
     return Config(
         map=map,
         source=source,
         dest=dest,
         delay=delay,
         heuristic=data["heuristic"],
+        theme=theme,
     )
 
 

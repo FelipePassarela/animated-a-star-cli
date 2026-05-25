@@ -9,7 +9,12 @@ class AStarRunner:
     def __init__(self, config: Config):
         self._algo = AStarAlgo(config)
         self.delay = config.delay
+        self._prev_time = time.perf_counter()
 
     def step(self) -> AStarState:
-        time.sleep(self.delay / 1000)
+        now = time.perf_counter()
+        dt = (now - self._prev_time) / 1000
+        time.sleep(dt)
+        self._prev_time = now
+
         return self._algo.step()
